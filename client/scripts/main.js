@@ -3,25 +3,52 @@
 var camera, scene, renderer, canvas;
 var cameraOrtho, sceneOrtho;
 
-var spriteTL, spriteTR, spriteBL, spriteBR, spriteC;
+var circleSprite, starSprite, redballonSprite;
+var mesh;
+var randomInt = 0;
+
+var width, height;
+
+// TRANSFORMS
+var TRANSF_mouseToHUD1 = new THREE.Matrix4();
+var TRANSF_mouseToHUD2 = new THREE.Matrix4();
+var TRANSF_worldToHUD1 = new THREE.Matrix4();
+var TRANSF_worldToHUD2 = new THREE.Matrix4();
+var TRANSF_viewToHUD = new THREE.Matrix4();
 
 init();
 animate();
 
 function init() {
-  var width = window.innerWidth;
-  var height = window.innerHeight;
 
-  camera = new THREE.PerspectiveCamera(60, width / height, 1, 2100);
-  camera.position.z = 1500;
+  updateComputedGeometry();
 
-  cameraOrtho = new THREE.OrthographicCamera(- width / 2, width / 2, height / 2, - height / 2, 1, 10);
+  camera = new THREE.PerspectiveCamera(
+    70,             // fov
+    width / height, // aspect
+    1,              // near
+    1000            // far
+  );
+  camera.position.x = 0;
+  camera.position.y = 0;
+  camera.position.z = 400;
+
+  cameraOrtho = new THREE.OrthographicCamera(
+    - width / 2,   // left
+    width / 2,     // right
+    height / 2,    // top
+    - height / 2,  // bottom
+    1,             // near
+    10             // far
+  );
   cameraOrtho.position.z = 10;
 
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x000000, 1500, 2100);
 
   sceneOrtho = new THREE.Scene();
+
+  // Geometry
 
   let geometry = new THREE.IcosahedronGeometry(200, 1);
   let material = new THREE.MeshBasicMaterial({
@@ -32,33 +59,26 @@ function init() {
   mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
+  randomInt = getRandomInt(mesh.geometry.vertices.length);
+
+  // var box = new THREE.Box3();
+  // box.setFromCenterAndSize(
+  //   new THREE.Vector3( -1, 1, 1 ),
+  //   new THREE.Vector3( -1, -1, 1 )
+  // );
+
+  // var helper = new THREE.Box3Helper( box, 0xffff00 );
+  // scene.add( helper );
+
   // create sprites
 
   var amount = 200;
   var radius = 500;
 
-  // SPRITES
-  // for (let i = 0; i < 50; i++) {
-  material = new THREE.SpriteMaterial({ color: Math.random() * 0xffffff });
-  sprite = new THREE.Sprite(material);
-  sprite.position.x = Math.random() * 1000 - 500;
-  sprite.position.y = Math.random() * 1000 - 500;
-  sprite.position.z = Math.random() * 1000 - 500;
-  sprite.scale.set(64, 64, 1);
-  scene.add(sprite);
-
-
-  material = new THREE.SpriteMaterial({ color: Math.random() * 0xffffff });
-  sprite = new THREE.Sprite(material);
-  sprite.position.x = 20;
-  sprite.position.y = 20;
-  sprite.position.z = 0;
-  sprite.scale.set(64, 64, 1);
-  scene.add(sprite);
-  // }
-
   var textureLoader = new THREE.TextureLoader();
-  var mapA = textureLoader.load("images/circle.png", createInferenceSprites);
+  textureLoader.load("images/circle.png", createCircleSprite);
+  textureLoader.load("images/star.png", createStarSprite);
+  textureLoader.load("images/redballon.png", createRedballonSprite);
 
   // renderer
 
@@ -69,23 +89,81 @@ function init() {
 
   canvas = document.body.appendChild(renderer.domElement);
   canvas.onmousemove = canvasMousemove;
-  canvas.onmouseup = canvasMouseup;
-
-  //
+  canvas.onmousedown = canvasMousedown;
 
   window.addEventListener('resize', onWindowResize, false);
 }
 
+function updateComputedGeometry() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+
+  // TRANSFORMS
+  // ortho x : (width / 2) to (- width / 2) | y : (height / 2) to (- height / 2)
+  TRANSF_mouseSpaceToHUDSpace.set(
+    1,  0,  0, - width  / 2,
+    0, -1,  0,   height / 2,
+    0,  0,  0,            1,
+    0,  0,  0,            1
+  );
+  // // ortho x : 1 to - 1 | y : 1 to - 1
+  // TRANSF_mouseToHUD2.set(
+  //   (1 / (-  width / 2)),                     0,  0,  0,
+  //                      0,  (1 / (  height / 2)),  0,  0,
+  //                      0,                     0,  1,  0,
+  //                      0,                     0,  0,  1
+  // );
+  // ortho x : (width / 2) to (- width / 2) | y : (height / 2) to (- height / 2)
+  // TRANSF_worldToHUD1.set(
+  //   1,  0,  0, - width  / 2,
+  //   0, -1,  0,   height / 2,
+  //   0,  0,  0,            1,
+  //   0,  0,  0,            1
+  // );
+  // ortho x : 1 to - 1 | y : 1 to - 1
+  // TRANSF_worldToHUD2.set(
+  //   1,  0,  0, - width  / 2,
+  //   0, -1,  0,   height / 2,
+  //   0,  0,  1,            0,
+  //   0,  0,  0,            1
+  // );
+  TRANSF_cameraSpaceToHUDSpace.set(
+    width / 2,           0,  0,  0,
+            0,  height / 2,  0,  0,
+            0,           0,  0,  1,
+            0,           0,  0,  1
+  );
+}
+
 function canvasMousemove(event) {
-  // logMouseCoords(event);
+  // logCoords(event, 'mousemove');
+  // let mouse = new THREE.Vector3( event.x, event.y, 1 );
+  // circleSprite.position.copy(mouse.applyMatrix4(TRANSF_mouseToHUD1));
 }
 
-function canvasMouseup(event) {
-  logMouseCoords(event);
+function canvasMousedown(event) {
+  logCoords(event, 'mousedown');
+  let HUDVecotr = new THREE.Vector3();
+
+  HUDVector = getHUDVectorFromWorldVector(starSprite.position, camera)
+  redballonSprite.position.copy(HUDVector);
+
+  sceneOrtho.add(redballonSprite);
 }
 
-function logMouseCoords(event) {
-  console.log(`(${event.x}, ${event.y})`);
+function getHUDVectorFromWorldVector(vector, camera) {
+  let HUDVector = vector.clone();
+
+  camera.worldToLocal(HUDVector);
+  HUDVector.applyMatrix4(camera.projectionMatrix);
+  
+  HUDVector.applyMatrix4(TRANSF_viewToHUD);
+
+  return HUDVector;
+}
+
+function logCoords(obj, name) {
+  console.log(`${name}: (${obj.x}, ${obj.y}, ${obj.z})`);
 }
 
 function animate() {
@@ -93,70 +171,62 @@ function animate() {
 
   mesh.rotation.x = Date.now() * 0.00005;
   mesh.rotation.y = Date.now() * 0.0001;
-  mesh.position.y += 0.0005;
-  mesh.position.z += 0.05;
+  // mesh.position.y += 0.0005;
+  // mesh.position.z += 0.05;
+
+  var randomVector = mesh.geometry.vertices[randomInt].clone();
+  randomVector.applyMatrix4(mesh.matrix);
+
+  if(starSprite) {
+    starSprite.position.copy(randomVector);
+  }
 
   render();
 }
 
-function createInferenceSprites(texture) {
-
+function createCircleSprite(texture) {
   var material = new THREE.SpriteMaterial({ map: texture });
 
   var width = material.map.image.width;
   var height = material.map.image.height;
 
-  spriteTL = new THREE.Sprite(material);
-  spriteTL.scale.set(width, height, 1);
-  sceneOrtho.add(spriteTL);
+  circleSprite = new THREE.Sprite(material);
+  circleSprite.scale.set(width * 0.3, height * 0.3, 1);
+  // sceneOrtho.add(circleSprite);
 
-  spriteTR = new THREE.Sprite(material);
-  spriteTR.scale.set(width, height, 1);
-  sceneOrtho.add(spriteTR);
-
-  spriteBL = new THREE.Sprite(material);
-  spriteBL.scale.set(width, height, 1);
-  sceneOrtho.add(spriteBL);
-
-  spriteBR = new THREE.Sprite(material);
-  spriteBR.scale.set(width, height, 1);
-  sceneOrtho.add(spriteBR);
-
-  spriteC = new THREE.Sprite(material);
-  spriteC.scale.set(width, height, 1);
-  sceneOrtho.add(spriteC);
-
-  updateHUDSprites();
-
+  // This is how to copy the sprite. Just save the material from this 
+  // step.
+  //
+  // spriteC = new THREE.Sprite(material);
+  // spriteC.scale.set(width, height, 1);
+  // sceneOrtho.add(spriteC);
 }
 
-function updateHUDSprites() {
+function createStarSprite(texture) {
+  var material = new THREE.SpriteMaterial({ map: texture });
 
-  var width = window.innerWidth / 2;
-  var height = window.innerHeight / 2;
+  var width = material.map.image.width;
+  var height = material.map.image.height;
 
-  var material = spriteTL.material;
+  starSprite = new THREE.Sprite(material);
+  starSprite.scale.set(width * 0.1, height * 0.1, 1);
+  scene.add(starSprite);
+}
 
-  var imageWidth = material.map.image.width / 2;
-  var imageHeight = material.map.image.height / 2;
+function createRedballonSprite(texture) {
+  var material = new THREE.SpriteMaterial({ map: texture });
 
-  spriteTL.position.set(- width + imageWidth, height - imageHeight, 1); // top left
-  spriteTR.position.set(width - imageWidth, height - imageHeight, 1); // top right
-  spriteBL.position.set(- width + imageWidth, - height + imageHeight, 1); // bottom left
-  spriteBR.position.set(width - imageWidth, - height + imageHeight, 1); // bottom right
-  spriteC.position.set(0, 0, 1); // center
+  var width = material.map.image.width;
+  var height = material.map.image.height;
 
-  console.log(spriteTL.position);
-  console.log(spriteTR.position);
-  console.log(spriteBL.position);
-  console.log(spriteBR.position);
-  console.log(spriteC.position);
+  redballonSprite = new THREE.Sprite(material);
+  redballonSprite.scale.set(width * 0.1, height * 0.1, 1);
+  // redballonSprite.position.set(0, 0, 1);
+  // sceneOrtho.add(redballonSprite);
 }
 
 function onWindowResize() {
-
-  var width = window.innerWidth;
-  var height = window.innerHeight;
+  updateComputedGeometry();
 
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
@@ -167,50 +237,54 @@ function onWindowResize() {
   cameraOrtho.bottom = - height / 2;
   cameraOrtho.updateProjectionMatrix();
 
-  updateHUDSprites();
-
   renderer.setSize(window.innerWidth, window.innerHeight);
-
 }
 
 function render() {
-
-  var time = Date.now() / 1000;
-
-  // for (var i = 0, l = group.children.length; i < l; i++) {
-
-  //   var sprite = group.children[i];
-  //   var material = sprite.material;
-  //   var scale = Math.sin(time + sprite.position.x * 0.01) * 0.3 + 1.0;
-
-  //   var imageWidth = 1;
-  //   var imageHeight = 1;
-
-  //   if (material.map && material.map.image && material.map.image.width) {
-
-  //     imageWidth = material.map.image.width;
-  //     imageHeight = material.map.image.height;
-
-  //   }
-
-  //   sprite.material.rotation += 0.1 * (i / l);
-  //   sprite.scale.set(scale * imageWidth, scale * imageHeight, 1.0);
-
-  //   if (material.map !== mapC) {
-
-  //     material.opacity = Math.sin(time + sprite.position.x * 0.01) * 0.4 + 0.6;
-
-  //   }
-
-  // }
-
-  // group.rotation.x = time * 0.5;
-  // group.rotation.y = time * 0.75;
-  // group.rotation.z = time * 1.0;
+  //thing();
 
   renderer.clear();
   renderer.render(scene, camera);
   renderer.clearDepth();
   renderer.render(sceneOrtho, cameraOrtho);
 
+}
+
+function thing() {
+  var time = Date.now() / 1000;
+
+  for (var i = 0, l = group.children.length; i < l; i++) {
+
+    var sprite = group.children[i];
+    var material = sprite.material;
+    var scale = Math.sin(time + sprite.position.x * 0.01) * 0.3 + 1.0;
+
+    var imageWidth = 1;
+    var imageHeight = 1;
+
+    if (material.map && material.map.image && material.map.image.width) {
+
+      imageWidth = material.map.image.width;
+      imageHeight = material.map.image.height;
+
+    }
+
+    sprite.material.rotation += 0.1 * (i / l);
+    sprite.scale.set(scale * imageWidth, scale * imageHeight, 1.0);
+
+    if (material.map !== mapC) {
+
+      material.opacity = Math.sin(time + sprite.position.x * 0.01) * 0.4 + 0.6;
+
+    }
+
+  }
+
+  group.rotation.x = time * 0.5;
+  group.rotation.y = time * 0.75;
+  group.rotation.z = time * 1.0;
+}
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
 }
