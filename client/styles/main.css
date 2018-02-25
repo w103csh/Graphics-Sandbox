@@ -1,9 +1,9 @@
-html, body, main {
-  margin: 0;
-  height: 100%;
-  width: 100%;
-}
-#graphicsBook1, #threeTest, #pdfTest {
+#graphicsBook1, #threeTest {
   height: 400px;
+}
+#graphicsBook1, #threeTest, header {
   margin-bottom: 8px;
+}
+#pdfTest {
+  /* width: 50%; */
 }

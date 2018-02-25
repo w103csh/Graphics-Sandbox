@@ -269,7 +269,7 @@
 
 })();
 
-function createPdfTexture(texture) {
-  console.log('PDF is now a texture. WTF!');
+function createPdfTextureThreeTest(texture) {
+  console.log('PDF is now a texture. WTF! TT');
   console.log(texture);
 }
