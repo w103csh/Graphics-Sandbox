@@ -1,25 +1,31 @@
+// globals
 var camera, scene, renderer;
-init();
+
+// test vars for animation
 var animate = false;
+var start = null;
+var last = null;
+var animationLength = 5;
+var animationRotation = null;
+var testAngle = null;
+
+init();
 animate && rotateScene();
 
 function init() {
+  let canvasParent = document.getElementById('graphicsBook1');
+  let aspect = canvasParent.clientWidth / canvasParent.clientHeight;
+
   camera = new THREE.PerspectiveCamera(
-    50,
-    window.innerWidth/window.innerHeight,
-    0.1,
-    1000
+    60, // fov
+    aspect, // aspect
+    0.1, //
+    10000 //
   );
   // X: RED || Y: GREEN || Z: BLUE
   // console.log(camera);
-  camera.position.z = 150;
-  camera.position.y = 90;
-  camera.position.x = 80;
-  
-  // 45 deg = 0.785398 rad
-  camera.rotation.x = -0.4;
-  camera.rotation.y = 0.4;
-  camera.rotation.z = 0.185;
+  camera.position.set(60, 30, 50);
+  camera.lookAt(0, 0, 0);
 
   scene = new THREE.Scene();
 
@@ -38,12 +44,14 @@ function init() {
   // console.log(a.geometry);
   // console.log(ua.geometry);
 
+  // renderer
   renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(canvasParent.devicePixelRatio);
+  renderer.setSize(canvasParent.clientWidth, canvasParent.clientHeight);
   renderer.setClearColor(0x000000, 1);
   !animate && renderer.render(scene, camera);
 
-  document.body.appendChild(renderer.domElement);
+  canvasParent.appendChild(renderer.domElement);
 }
 
 function getHelloWorldMesh() {
@@ -120,14 +128,28 @@ function makeGeom() {
   return geometry;
 }
 
+var notifyLength = true;
+var rotSoFar = 0;
 function rotateScene() {
   window.requestAnimationFrame(rotateScene);
-  //console.log(scene);
-  scene.children.forEach((child) => {
-    child.rotation.x = Date.now() * 0.00005;
-    child.rotation.y = Date.now() * 0.0001;
-    child.position.y += 0.0005;
-    child.position.z += 0.05;
-  });
+
+  let now = Date.now() / 1000 ; // now in seconds
+  start = start || now;
+  let elapsed = now - start;
+
+  if( elapsed <= animationLength ) {
+    let rotPercent = animationRotation * ( elapsed / animationLength );
+    let rot = rotPercent - rotSoFar; // only rotate the the amount percent since calc.
+    rotSoFar = rotPercent;
+    console.log(rot);
+    camera.rotateZ( rot );
+    camera.updateProjectionMatrix();
+  }
+  else if (notifyLength) {
+    notifyLength = false;
+    console.log(`elapsed: ${elapsed}`);
+    debugger;
+  }
+
   renderer.render(scene, camera);
 }

@@ -3,4 +3,7 @@ html, body, main {
   height: 100%;
   width: 100%;
 }
- 
+#graphicsBook1, #threeTest, #pdfTest {
+  height: 400px;
+  margin-bottom: 8px;
+}
