@@ -116,8 +116,7 @@ var PDFTest = (function PDFTestClosure() {
 
   function pageRendered() {
     console.log('Page rendered.');
-    let image = __instance._canvas.toDataURL();
-    _textureLoader.load(image, __callback);
+    __callback(__instance._canvas);
   }
 
   function getDimensions(viewport, scaleToHeight) {

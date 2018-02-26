@@ -21,8 +21,8 @@ function init() {
   camera = new THREE.PerspectiveCamera(
     60, // fov
     aspect, // aspect
-    0.1, //
-    10000 //
+    20, // near
+    10000 // far
   );
   // X: RED || Y: GREEN || Z: BLUE
   // console.log(camera);
@@ -37,14 +37,9 @@ function init() {
   });
 
   let workPlane = getWorkPlane();
-  scene.add(workPlane);
-  
-  // let a = getRandomLineGeom();
-  // scene.add(a);
-  // let ua = getUnitVectorLineGeom(a, false);
-  // scene.add(ua);
-  // console.log(a.geometry);
-  // console.log(ua.geometry);
+  // scene.add(workPlane);
+
+  simpleMathPractice();
 
   // renderer
   renderer = new THREE.WebGLRenderer();
@@ -56,6 +51,67 @@ function init() {
 
   canvas = renderer.domElement;
   canvasParent.appendChild(canvas);
+}
+
+function simpleMathPractice() {
+  for (let count=0; count<1; count++) {
+    let l = getRandomLine();
+    scene.add(l);
+
+    let unitVectorTest = false;
+    if (unitVectorTest) {
+      let ul = getUnitVectorLine(l, '0xa52a2a');
+      scene.add(ul);
+    }
+
+    let orthoTest = true;
+    if (orthoTest) {
+      getOthonormalBasis(
+        l.geometry.vertices[0].clone(),
+        l.geometry.vertices[1].clone(),
+        camera.up
+      );
+    }
+  }
+}
+
+function getOthonormalBasis(eye, target, up) {
+  let xMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+  let yMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+  let zMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
+
+  let z = new THREE.Vector3().subVectors(eye, target);
+  z.normalize();
+
+  let x = new THREE.Vector3().crossVectors(z, up);
+  x.normalize();
+
+  let y = new THREE.Vector3().crossVectors(x, z);
+  y.normalize();
+  
+  let geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    eye,
+    new THREE.Vector3().addVectors(eye, x)
+  );
+  let line = new THREE.Line(geometry, xMaterial);
+  scene.add(line);
+  
+  geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    eye,
+    new THREE.Vector3().addVectors(eye, y)
+  );
+  line = new THREE.Line(geometry, yMaterial);
+  scene.add(line);
+  
+  geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    eye,
+    new THREE.Vector3().addVectors(eye, z)
+  );
+  line = new THREE.Line(geometry, zMaterial);
+  scene.add(line);
 }
 
 function getAxisVector(axis, direction) {
@@ -83,7 +139,7 @@ function getAxisLinesGeom() {
         material = new THREE.LineBasicMaterial({ color: 0x0000ff });
         break;
     }
-    geometry = makeGeom(getAxisVector(axis, -1), getAxisVector(axis, 1));
+    geometry = makeGeometry(getAxisVector(axis, -1), getAxisVector(axis, 1));
     axisLines.push(new THREE.Line(geometry, material));
   });
   return axisLines;
@@ -91,29 +147,50 @@ function getAxisLinesGeom() {
 
 function getRandomVector() {
   let max = 50;
-  let x1 = Math.floor(Math.random() * max + 1) - max / 2;
-  //console.debug("x1: " + x1);
-  let x2 = Math.floor(Math.random() * max + 1) - max / 2;
-  //console.debug("x2: " + x2);
-  let x3 = Math.floor(Math.random() * max + 1) - max / 2;
-  //console.debug("x3: " + x3);
-  return new THREE.Vector3(x1, x2, x3);
+
+  let vector = new THREE.Vector3();
+  Object.keys(vector).forEach((key) => {
+    vector[key] = Math.floor(Math.random() * max + 1) - max / 2;
+  });
+
+  return vector;
 }
 
-function getRandomLineGeom(color) {
-  let material = new THREE.LineBasicMaterial({ color: color || 0xffffff });
-  return new THREE.Line(makeGeom(getRandomVector(), getRandomVector()), material);
+function getRandomLine(color) {
+
+  let material = new THREE.LineBasicMaterial({
+    color: color || 0xffa500
+  });
+
+  return new THREE.Line(makeGeometry(
+    getRandomVector(),
+    getRandomVector()
+  ), material);
+
 }
 
-function getUnitVectorLineGeom(line) {
-  let material = new THREE.LineBasicMaterial({color:0xff0000});
-  let geomCopy = new THREE.Geometry().copy(line.geometry);
-  let unit = new THREE.Vector3().subVectors(geomCopy.vertices[1], geomCopy.vertices[0]).normalize();
-  geomCopy.vertices[1] = new THREE.Vector3().addVectors(geomCopy.vertices[0], unit);
-  return new THREE.Line(makeGeom.apply(null, geomCopy.vertices), material);
+function getUnitVectorLine(line, color) {
+  let material = new THREE.LineBasicMaterial({
+    color: color || 0x00000
+  });
+
+  // I guess just use [0] as origin
+  let p1 = line.geometry.vertices[0].clone();
+  let unit = new THREE.Vector3().subVectors(
+    p1,
+    line.geometry.vertices[1]
+  ).normalize();
+
+  let p2 = p1.clone().add(unit);
+
+  return new THREE.Line(makeGeometry(
+    p1,
+    p2
+  ), material);
+
 }
 
-function makeGeom() {
+function makeGeometry() {
   var geometry = new THREE.Geometry();
   var args = Array.from(arguments);
   args.forEach(arg => {
@@ -123,7 +200,7 @@ function makeGeom() {
 }
 
 function getWorkPlane() {
-  let scale = 1;
+  let scale = 0.001;
 
   let geometry = new THREE.PlaneGeometry(
     maxDistance * scale, // width
@@ -173,18 +250,21 @@ function createPDFRect(material) {
   scene.add(rectMesh); 
 }
 
-function createPdfTextureGraphicsBook1(texture) {
-  console.log('PDF is now a texture. WTF! GB');
+function createPdfTextureGraphicsBook1(canvas) {
 
-  // Test image quality
-  let div = document.createElement('div');
-  let header = document.createElement('h3');
-  header.textContent = 'Image quality test';
-  div.appendChild(header);
-  let img = document.createElement('img');
-  img.src = texture.image.currentSrc;
-  div.appendChild(img);
-  document.body.appendChild(div);
+  // // Test image quality
+  // let div = document.createElement('div');
+  // let header = document.createElement('h3');
+  // header.textContent = 'Image quality test';
+  // div.appendChild(header);
+  // let img = document.createElement('img');
+  // img.src = texture.image.currentSrc;
+  // div.appendChild(img);
+  // document.body.appendChild(div);
+
+  let texture = new THREE.CanvasTexture(canvas);
+
+  console.log('PDF is now a texture. WTF! GB');
   
   let material = new THREE.MeshBasicMaterial({
     map: texture,
