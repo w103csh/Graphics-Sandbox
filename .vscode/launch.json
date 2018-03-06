@@ -9,7 +9,7 @@
       "request": "launch",
       "preLaunchTask": "npm: start",
       "name": "Launch Chrome",
-      "url": "http://localhost:3000",
+      "url": "http://localhost:3001",
       "webRoot": "${workspaceFolder}/client"
     }
   ]
