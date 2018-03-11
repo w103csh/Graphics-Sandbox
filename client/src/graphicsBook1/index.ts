@@ -2,28 +2,22 @@ import * as THREE from 'three';
 import {
   THREEClosure,
   FuncLib
-} from "../threeHelpers";
+} from "../threeLib";
 
 import 'styles/main.css';
 
 export function addGraphicsBook1UI(parent: HTMLElement) {
-
-  // File input
+  // Canvas parent
   let canvasParent = document.createElement('div') as HTMLDivElement;
   canvasParent.id = 'graphicsBook1Div';
-  canvasParent.classList.add('canvas-def-height', 'def-margin-bottom');
+  canvasParent.classList.add('canvas-parent-default', 'def-margin-bottom');
   parent.appendChild(canvasParent);
 
-  let threeClosure = new THREEClosure(
-    canvasParent,
-    new THREE.Vector3(50, 30, 50),
-    new THREE.Vector3(0, 0, 0)
-  );
+  let threeClosure = new THREEClosure(canvasParent, FuncLib.getDefaultPerspectiveCamera());
 
   threeClosure.init(() => {
-
+    // X: RED || Y: GREEN || Z: BLUE
     let axes = FuncLib.getAxisLinesGeom(threeClosure.maxDistance);
-
     axes.forEach(axis => {
       threeClosure.scene.add(axis);
     });

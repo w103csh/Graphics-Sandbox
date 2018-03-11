@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 
 import {
-  THREEClosure,
-  rotateScene
+  THREEClosure
 } from './index';
 
 export class AnimationClosure extends THREEClosure {
@@ -16,10 +15,8 @@ export class AnimationClosure extends THREEClosure {
   private animationRotation: number;
   private testAngle: number;
   
-  constructor(canvasParent: HTMLElement, cameraPosition: THREE.Vector3, cameraLookAt: THREE.Vector3,
-     animations: Function[]) {
-
-    super(canvasParent, cameraPosition, cameraLookAt);
+  constructor(canvasParent: HTMLElement, camera: THREE.PerspectiveCamera, animations: Function[]) {
+    super(canvasParent, camera);
 
     this.animations = animations;
     this.doAnimate = true;
@@ -36,8 +33,18 @@ export class AnimationClosure extends THREEClosure {
   }
 
   animate(): void {
-    window.requestAnimationFrame(this.animate);
+    window.requestAnimationFrame(() => this.animate.call(this));
     this.animations.forEach(animation => animation());
-    this.renderer.render(this.scene, this.camera);
+    this.render();
   }
+}
+
+export interface ViewportDimensions {
+  width: number;
+  height: number;
+  aspect: number;
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
 }

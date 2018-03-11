@@ -1,11 +1,9 @@
 // Assets
 import 'styles/main.css';
-import CircleImg from 'images/circle.png';
-import RedBallonImg from 'images/redballon.png';
-import StarImg from 'images/star.png';
 
-import { addPdfTestDefaultUI } from './pdfTest';
+import { addPdfTestDefaultUI } from './pdfTester';
 import { addGraphicsBook1UI } from './graphicsBook1';
+import { addHUDTesterUI } from './HUDTester';
 
 // Header
 let header = document.createElement('header') as HTMLElement;
@@ -27,3 +25,4 @@ document.body.appendChild(footer);
 
 addPdfTestDefaultUI(header, footer);
 addGraphicsBook1UI(main);
+addHUDTesterUI(main);

@@ -1,5 +1,7 @@
-.canvas-def-height {
-  height: 800px;
+.canvas-parent-default {
+  height: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .def-margin-bottom {
   margin-bottom: 8px;

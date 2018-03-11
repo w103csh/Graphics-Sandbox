@@ -102,9 +102,9 @@ export namespace FuncLib {
 
   export function getRandomVector(): THREE.Vector3 {
     let max = 50;
-    let x = Math.floor(Math.random() * max + 1) - max / 2;
-    let y = Math.floor(Math.random() * max + 1) - max / 2;
-    let z = Math.floor(Math.random() * max + 1) - max / 2;
+    let x = getRandomInt(max + 1) - max / 2;
+    let y = getRandomInt(max + 1) - max / 2;
+    let z = getRandomInt(max + 1) - max / 2;
     let vector = new THREE.Vector3(x, y, z);
     return vector;
   }
@@ -217,4 +217,63 @@ export namespace FuncLib {
     createPDFRect.call(this, material);
   }
 
+  export function getRandomInt(max: number): number {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
+
+  export function createSprite(texture: THREE.Texture, name: string, scene?: THREE.Scene, scaleToScreen?: Function): THREE.Sprite {
+    let material = new THREE.SpriteMaterial({ map: texture });
+
+    let width = material.map.image.width;
+    let height = material.map.image.height;
+
+    let scale = name === 'redballon' ? 0.1 : 0.5;
+
+    let scaleVector = scaleToScreen ? scaleToScreen(width, height, scale) : new THREE.Vector3(width * 0.1, height * 0.1, 1);
+
+    let sprite = new THREE.Sprite(material);
+    sprite.scale.set(scaleVector.x, scaleVector.y, scaleVector.z);
+
+    sprite.name = name;
+    scene && scene.add(sprite);
+
+    return sprite;
+  }
+
+  export function getHUDVectorFromWorldVector(
+    vector: THREE.Vector3,
+    camera: THREE.Camera,
+    transform: Function
+  ): THREE.Vector3 {
+    let HUDVector = vector.clone();
+    camera.worldToLocal(HUDVector);
+    HUDVector.applyMatrix4(camera.projectionMatrix);
+    HUDVector = transform(HUDVector);
+    return HUDVector;
+  }
+
+  export function logCoords(obj: any, name: string) {
+    console.log(`${name}: (${obj.x}, ${obj.y}, ${obj.z})`);
+  }
+
+  export function getDefaultPerspectiveCamera(lookAtOrigin: boolean = true): THREE.PerspectiveCamera {
+    let camera = new THREE.PerspectiveCamera(
+      60,                 // fov
+      16 / 9,             // aspect (default)
+      20,                 // near
+      10000               // far
+    );
+    camera.position.set(50, 30, 50);
+    lookAtOrigin && camera.lookAt(0, 0, 0);
+    return camera;
+  }
+
+  export function getMouseEventScreenCoords(ev: MouseEvent) {
+    let element = ev.target as Element;
+    let rect = element.getBoundingClientRect() as DOMRect;
+    let x = ev.clientX - rect.x;
+    let y = ev.clientY - rect.y;
+    return new THREE.Vector3(x, y, 0);
+  }
 }
