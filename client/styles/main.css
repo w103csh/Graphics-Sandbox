@@ -1,9 +1,0 @@
-#graphicsBook1, #threeTest {
-  height: 400px;
-}
-#graphicsBook1, #threeTest, header {
-  margin-bottom: 8px;
-}
-#pdfTest {
-  /* width: 50%; */
-}

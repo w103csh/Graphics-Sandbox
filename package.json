@@ -1,10 +1,11 @@
 {
-  "name": "threejs",
+  "name": "threejs_playground",
   "version": "1.0.0",
   "description": "test some threejs stuff",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "webpack-dev-server --open",
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,25 @@
     "url": "https://github.com/w103csh/threejs/issues"
   },
   "homepage": "https://github.com/w103csh/threejs#readme",
-  "dependencies": {
-    "express": "^4.16.2"
-  }
+  "dependencies": {},
+  "devDependencies": {
+    "@types/lodash": "^4.14.104",
+    "@types/node": "^9.4.7",
+    "@types/pdfjs-dist": "^0.1.2",
+    "@types/three": "^0.89.12",
+    "clean-webpack-plugin": "^0.1.19",
+    "css-loader": "^0.28.10",
+    "file-loader": "^1.1.11",
+    "html-webpack-plugin": "^3.0.6",
+    "lodash": "^4.17.5",
+    "pdfjs-dist": "^2.0.428",
+    "style-loader": "^0.20.3",
+    "three": "^0.90.0",
+    "ts-loader": "^4.0.1",
+    "typescript": "^2.7.2",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.11",
+    "webpack-dev-server": "^3.1.1"
+  },
+  "keywords": []
 }
