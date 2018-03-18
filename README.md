@@ -1,2 +1,2 @@
-# threejs
-This is a test spot for threejs.
+# Graphics-Sandbox
+This is a test spot for all my graphics learning.
