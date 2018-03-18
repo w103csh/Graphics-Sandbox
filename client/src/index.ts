@@ -23,6 +23,6 @@ footer.id = 'footer';
 footer.classList.add('def-margin-bottom');
 document.body.appendChild(footer);
 
-addPdfTestDefaultUI(header, footer);
+// addPdfTestDefaultUI(header, footer);
 addGraphicsBook1UI(main);
-addHUDTesterUI(main);
+// addHUDTesterUI(main);

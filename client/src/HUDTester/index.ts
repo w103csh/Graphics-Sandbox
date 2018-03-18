@@ -1,7 +1,7 @@
 // Assets
-import CircleImg from 'images/circle.png';
-import RedBallonImg from 'images/redballon.png';
-import StarImg from 'images/star.png';
+import circleImg from 'images/sprites/circle.png';
+import redballonImg from 'images/sprites/redballon.png';
+import starImg from 'images/sprites/star.png';
 import 'styles/main.css';
 
 import * as THREE from 'three';
@@ -58,13 +58,13 @@ export function addHUDTesterUI(parent: HTMLElement) {
     radius = 500;
 
     // Load sprites
-    textureLoader.load(CircleImg, (texture: THREE.Texture) => {
+    textureLoader.load(circleImg, (texture: THREE.Texture) => {
       circleSprite = FuncLib.createSprite(texture, 'circle', undefined, animationClosure.scaleToScreen);
     });
-    textureLoader.load(StarImg, (texture: THREE.Texture) => {
+    textureLoader.load(starImg, (texture: THREE.Texture) => {
       starSprite = FuncLib.createSprite(texture, 'start', animationClosure.scene);
     });
-    textureLoader.load(RedBallonImg, (texture: THREE.Texture) => {
+    textureLoader.load(redballonImg, (texture: THREE.Texture) => {
       redballonSprite = FuncLib.createSprite(texture, 'redballon', undefined, animationClosure.scaleToScreen);
     });
 

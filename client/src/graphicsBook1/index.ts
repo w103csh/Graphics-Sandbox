@@ -1,7 +1,11 @@
 import * as THREE from 'three';
 import {
   THREEClosure,
-  FuncLib
+  FuncLib,
+  Object3D,
+  AnimationClosure,
+  BackgroundCubes,
+  Events
 } from "../threeLib";
 
 import 'styles/main.css';
@@ -13,18 +17,63 @@ export function addGraphicsBook1UI(parent: HTMLElement) {
   canvasParent.classList.add('canvas-parent-default', 'def-margin-bottom');
   parent.appendChild(canvasParent);
 
-  let threeClosure = new THREEClosure(canvasParent, FuncLib.getDefaultPerspectiveCamera());
+  /**
+   * ANIMATIONS
+   */
 
-  threeClosure.init(() => {
+  /**
+   * CLOSURE
+   */
+  let animationClosure = new AnimationClosure(canvasParent, FuncLib.getDefaultPerspectiveCamera(), [], 'oldCity');
+
+  /**
+   * SETUP
+   */
+  let setup = function(this: THREEClosure) {
     // X: RED || Y: GREEN || Z: BLUE
-    let axes = FuncLib.getAxisLinesGeom(threeClosure.maxDistance);
+    let axes = FuncLib.getAxisLinesGeom(this.maxDistance);
     axes.forEach(axis => {
-      threeClosure.scene.add(axis);
+      this.scene.add(axis);
     });
-  
-    let workPlane = FuncLib.getWorkPlane(threeClosure.maxDistance);
-    // scene.add(workPlane);
 
-    FuncLib.simpleMathPractice(threeClosure.scene, threeClosure.camera, 3);
-  });
+    // ****************************
+    BackgroundCubes.setBackground('oldCity', this.scene);
+
+    let workPlane = Object3D.getWorkPlane(this.maxDistance);
+    this.scene.add(workPlane);
+
+    FuncLib.simpleMathPractice(this.scene, this.camera, 3);
+  };
+
+  /**
+   * REGISTER EVENTS
+   */
+  let registerEvents = function(this: THREEClosure) {
+    let camera = this.camera;
+
+    // Track input
+    Events.trackMouseInput(
+      this.canvas,
+      undefined, // mousedown
+      undefined, // mouseup
+      function(this: HTMLElement, ev: KeyboardEvent) {
+        Events.Handlers.look.call(this, ev, camera);
+        Events.Handlers.pan.call(this, ev, camera);
+      },         // mousemove
+    );
+    Events.trackKeyboardInput(
+      document,
+      function(this: HTMLElement, ev: KeyboardEvent) {
+        Events.Handlers.move.call(this, ev, camera);
+      },         // keydown
+      undefined  // keyup
+    );
+
+    // Other handlers
+    this.canvas.oncontextmenu = function(this: HTMLElement, ev: PointerEvent) {
+        ev.preventDefault();
+    };
+  };
+
+  animationClosure.init(setup, registerEvents);
 }

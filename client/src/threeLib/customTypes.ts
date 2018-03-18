@@ -6,6 +6,9 @@ import {
 
 export class AnimationClosure extends THREEClosure {
 
+  // Renderer
+  public composer: THREE.EffectComposer;
+
   // test vars for animation
   private animations: Function[];
   private doAnimate: boolean;
@@ -14,21 +17,27 @@ export class AnimationClosure extends THREEClosure {
   private animationLength: number;
   private animationRotation: number;
   private testAngle: number;
-  
-  constructor(canvasParent: HTMLElement, camera: THREE.PerspectiveCamera, animations: Function[]) {
+
+  constructor(canvasParent: HTMLElement, camera: THREE.PerspectiveCamera, animations?: Function[], background?: string) {
     super(canvasParent, camera);
 
-    this.animations = animations;
+    // // Renderer
+    // this.composer = new THREE.EffectComposer(this.renderer);
+
+    // this.setupPasses(background);
+
+    this.animations = animations || [];
     this.doAnimate = true;
     this.start = null;
     this.last = null;
     this.animationLength = 5;
     this.animationRotation = null;
     this.testAngle = null;
+
   }
 
-  init(setup: Function) {
-    super.init(setup);
+  init(setup: Function, registerEvents?: Function) {
+    super.init(setup, registerEvents);
     this.animate();
   }
 
@@ -37,6 +46,18 @@ export class AnimationClosure extends THREEClosure {
     this.animations.forEach(animation => animation());
     this.render();
   }
+
+  // private setupPasses(background: string) {
+  //   // Clear pass
+  //   let pass = new THREE.RenderPass(this.scene, this.camera);
+  //   this.composer.addPass(clearPass);
+
+  //   if(background) {
+  //     let pass = new THREE.RenderPass(this.scene, this.camera);
+  //     pass.env
+  //     this.composer.addPass(clearPass);
+  //   }
+  // }
 }
 
 export interface ViewportDimensions {

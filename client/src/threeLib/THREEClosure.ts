@@ -8,8 +8,8 @@ export class THREEClosure {
 
   // ******** Members ********
   private parent: HTMLElement;
-  private canvas: HTMLCanvasElement;
   protected renderer: THREE.WebGLRenderer;
+  public canvas: HTMLCanvasElement;
   public camera: THREE.PerspectiveCamera;
   public scene: THREE.Scene;
   public maxDistance = 500000;
@@ -61,8 +61,9 @@ export class THREEClosure {
     }, false);
   }
 
-  init(setup: Function): void {
+  init(setup: Function, registerEvents?: Function): void {
     setup.call(this);
+    registerEvents && registerEvents.call(this);
     this.render();
   }
 
