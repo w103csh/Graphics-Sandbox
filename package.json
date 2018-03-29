@@ -17,7 +17,10 @@
     "url": "https://github.com/w103csh/threejs/issues"
   },
   "homepage": "https://github.com/w103csh/threejs#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@types/uuid": "^3.4.3",
+    "uuid": "^3.2.1"
+  },
   "devDependencies": {
     "@types/lodash": "^4.14.104",
     "@types/node": "^9.4.7",
