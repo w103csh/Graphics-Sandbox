@@ -7,10 +7,10 @@ module.exports = {
   context: path.resolve(__dirname, 'client', 'src'),
   entry: {
     app: './index.ts',
-    // print: './client/src/scripts/something.js'
+    'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry'
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ],
+    extensions: ['.tsx', '.ts', '.js'],
     alias: {
       images: path.resolve(__dirname, 'client', 'assets', 'images'),
       styles: path.resolve(__dirname, 'client', 'assets', 'styles'),
@@ -24,11 +24,12 @@ module.exports = {
     new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
       title: 'THREE Sandbox',
+      chunks: ['app']
     })
   ],
   output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].bundle.js'
   },
   module: {
     rules: [

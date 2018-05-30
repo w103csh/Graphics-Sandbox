@@ -65,7 +65,7 @@ export class SpaceEx {
       // Remove the already resolved commits from result list
       _.remove(commitResults, SpaceEx.isResolved);
 
-      // If retry desired then recurse tryCommits
+      // If some rejected and retry desired then recurse tryCommits
       if(commitResults.length > 0 && this.retryCount < this.maxRetries) {
 
         this.retryCount++;

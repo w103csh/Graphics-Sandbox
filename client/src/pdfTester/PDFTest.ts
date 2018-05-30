@@ -5,8 +5,8 @@ import {
   PDFPageViewport,
 } from 'pdfjs-dist';
 
-const PDFJS: PDFJSStatic = require('pdfjs-dist');
-PDFJS.workerSrc = require('pdfjs-dist/build/pdf.worker.entry');
+const PDFJS: any = require('pdfjs-dist');
+PDFJS.GlobalWorkerOptions.workerSrc = './pdf.worker.bundle.js';
 
 export class PDFTest {
   private callback: Function;
@@ -36,7 +36,7 @@ export class PDFTest {
   private static handleFiles(this: HTMLInputElement, ev: Event, instance: PDFTest) {
     // Setup file reader
     let fileReader = new FileReader();
-    fileReader.onload = function(this: MSBaseReader, ev: Event) {
+    fileReader.onload = function(this: FileReader, ev: Event) {
       PDFTest.pdfLoaded.call(this, ev, instance);
     }
 
@@ -46,7 +46,7 @@ export class PDFTest {
     }
   }
 
-  private static pdfLoaded(this: MSBaseReader, ev: Event, instance: PDFTest) {
+  private static pdfLoaded(this: FileReader, ev: Event, instance: PDFTest) {
     let array = new Uint8Array(this.result);
     PDFJS.getDocument(array).then((doc: PDFDocumentProxy) => {
       console.log('PDF loaded');
