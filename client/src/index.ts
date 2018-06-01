@@ -19,19 +19,23 @@ main.id = 'main';
 main.classList.add('def-margin-bottom');
 document.body.appendChild(main);
 
-// Main
+// Footer
 let footer = document.createElement('footer') as HTMLElement;
 footer.id = 'footer';
 footer.classList.add('def-margin-bottom');
 document.body.appendChild(footer);
 
-addPdfTestDefaultUI(header, footer);
+// Slider
+let sliderContainer = document.createElement('div');
+sliderContainer.style.width = '50%';
+footer.appendChild(sliderContainer);
 
-let slider = new Slider(4, 2, 9, 35);
-footer.appendChild(slider.container);
+let slider = new Slider(3.1, -1, 4, 60, 2, [], (value: number) => { console.log(value); });
+sliderContainer.appendChild(slider.container);
+
+addPdfTestDefaultUI(header, footer);
 // addGraphicsBook1UI(main);
 // addHUDTesterUI(main);
-
 // let space = new SpaceEx();
 
 // space.addComponent('x');

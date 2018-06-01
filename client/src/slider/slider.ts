@@ -1,4 +1,6 @@
 
+import './slider.css';
+
 export class Slider {
 
   public container: HTMLDivElement;
@@ -7,23 +9,39 @@ export class Slider {
   public min: number;
   public max: number;
   public increment: number;
+  public precision: number;
+  public update: (value: number) => any;
 
-  constructor(initialValue: number, min: number, max: number, increment: number) {
-    if(!Number.isInteger(min) || !Number.isInteger(max) || !Number.isInteger(increment)) {
-      console.error('Min, max, and increment must be integers.');
+  constructor(
+    initialValue: number,
+    min: number,
+    max: number,
+    increment: number,
+    precision: number,
+    cssClasses: string[],
+    update: (value: number) => any
+  ) {
+
+    if(!Number.isInteger(min) || !Number.isInteger(max) || !Number.isInteger(increment) || !Number.isInteger(precision)) {
+      console.error('Min, max, increment, and precisison must be integers.');
     }
+
     this.min = min;
     this.max = max;
     this.increment = increment;
+    this.precision = precision;
+    this.update = update;
+
     // container
     this.container = document.createElement('div');
     this.container.classList.add('slider-container');
+    cssClasses.forEach(cssClass => this.container.classList.add(cssClass));
     // range slider
     this.rangeSlider = document.createElement('input');
     this.rangeSlider.classList.add('slider-range-slider');
     this.rangeSlider.type = 'range';
     this.setRangeMinMax();
-    this.rangeSlider.value = this.getValueForRangeSlider(initialValue);
+    this.rangeSlider.value = this.getValueForRangeSlider(initialValue).toFixed(this.precision);
     this.container.appendChild(this.rangeSlider);
     // number box
     this.numberBox = document.createElement('input');
@@ -40,15 +58,15 @@ export class Slider {
     this.rangeSlider.max = (this.min + this.increment).toString();
   }
 
-  private getValueForNumberBox(value: number): string {
+  private getValueForNumberBox(value: number): number {
     let rat = Math.abs(this.min - value) / this.increment;
     let diffRat = (this.max - this.min) * rat;
-    return (this.min + diffRat).toString();
+    return this.min + diffRat;
   }
 
-  private getValueForRangeSlider(value: number): string {
+  private getValueForRangeSlider(value: number): number {
     let rat = (value - this.min) / (this.max - this.min);
-    return (this.min + (this.increment * rat)).toString();
+    return this.min + (this.increment * rat);
   }
 
   private registerListeners() {
@@ -56,25 +74,19 @@ export class Slider {
     // range slider
     this.rangeSlider.onchange = function(this: HTMLInputElement, ev: Event) {
       let val = Number(this.value);
-      if(Number.isNaN(val)) {
-        console.error('Range slider value must be a number.');
-      }
-      control.numberBox.value = control.getValueForNumberBox(val);
+      val = control.getValueForNumberBox(val);
+      control.update(val);
+      control.numberBox.value = val.toFixed(control.precision); 
     }
     // number box
     this.numberBox.onchange = function(this: HTMLInputElement, ev: Event) {
       let val = Number(this.value);
-      if(Number.isNaN(val)) {
-        console.error('Number box value must be a number.');
-      }
       if(val < control.min || val > control.max) {
         this.value = (val < control.min ? control.min : val > control.max ? control.max : control.min).toString();
       }
-      control.rangeSlider.value = control.getValueForRangeSlider(val);
+      val = control.getValueForNumberBox(val);
+      control.update(val);
+      control.rangeSlider.value = val.toFixed(control.precision);
     }
   }
-// <div class="""slidecontainer">
-// <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-// <p>Value: <span id="demo"></span></p>
-// </div>
 }
