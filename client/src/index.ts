@@ -5,6 +5,7 @@ import { addPdfTestDefaultUI } from './pdfTester';
 import { addGraphicsBook1UI } from './graphicsBook1';
 import { addHUDTesterUI } from './HUDTester';
 import { SpaceEx, CommitPromiseResult } from './quantumClientEx';
+import { Slider } from './slider/slider';
 
 // Header
 let header = document.createElement('header') as HTMLElement;
@@ -25,6 +26,9 @@ footer.classList.add('def-margin-bottom');
 document.body.appendChild(footer);
 
 addPdfTestDefaultUI(header, footer);
+
+let slider = new Slider(4, 2, 9, 35);
+footer.appendChild(slider.container);
 // addGraphicsBook1UI(main);
 // addHUDTesterUI(main);
 
